@@ -204,6 +204,29 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 .bk-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .bk-last { font-size: 11px; color: var(--faint); }
 .bk-last.err { color: var(--danger); }
+.dw { text-decoration: underline dotted var(--link-missing); text-decoration-thickness: 2px; text-underline-offset: 4px; cursor: help; }
+.lk-pop { position: fixed; z-index: 25; }
+.lk-pop button { background: var(--ink); color: var(--bg); border-radius: 999px; padding: 9px 16px; font-weight: 600; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.45); white-space: nowrap; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+.wd-word { font-size: 28px; font-weight: 700; font-family: var(--read); margin: 0; overflow-wrap: anywhere; }
+.wd-ph { color: var(--muted); font-family: var(--mono); font-size: 13px; }
+.wd-pos { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); font-weight: 600; margin: 12px 0 6px; }
+.wd-defs { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.55; }
+.wd-defs em { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.wd-ctx { border-left: 3px solid var(--line); padding-left: 10px; color: var(--muted); font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
+.wd-ctx button { color: var(--accent); font-weight: 600; font-size: 12px; margin-top: 4px; }
+#wd-mine { width: 100%; min-height: 70px; border: 1px solid var(--line); border-radius: 8px; background: var(--side); padding: 8px 10px; font: inherit; font-size: 14px; resize: vertical; }
+#wd-mine:focus { outline: none; border-color: var(--accent); }
+.wd-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.wd-acts a { color: var(--muted); font-size: 12px; margin-left: auto; }
+.dict-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--faint); }
+.dict-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.wcard { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; align-items: baseline; text-align: left; padding: 12px 6px; border-bottom: 1px solid var(--line); width: 100%; border-radius: 0; }
+.wcard:hover { background: var(--side); }
+.wcard b { font-size: 16px; font-weight: 700; }
+.wcard .pos { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-left: 8px; font-weight: 600; }
+.wcard .def { grid-column: 1 / -1; color: var(--muted); font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wcard small { color: var(--faint); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
+@media (max-width: 820px) { #wd-mine, #dict-in { font-size: 16px; } }
 .sync-steps { margin: 0; padding-left: 18px; font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 52ch; }
 .sync-steps a { color: var(--accent); }
 #sync-token { flex: 1 1 180px; min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--side); padding: 7px 10px; font-size: 13px; font-family: var(--mono); }
@@ -332,6 +355,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
   <symbol id="i-tpl" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
   <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></symbol>
   <symbol id="i-review" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/><path d="M12 8v4l2.5 1.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6M9 11h4"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M19 14l.7 1.8 1.8.7-1.8.7L19 19l-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
 </svg>
@@ -345,6 +369,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
         <button class="ib w" id="b-daily" title="Open today's daily note" aria-label="Open today's daily note"><svg class="i"><use href="#i-cal"/></svg></button>
         <button class="ib" id="b-graph" title="Graph view (Alt+G)" aria-label="Graph view" aria-pressed="false"><svg class="i"><use href="#i-graph"/></svg></button>
         <button class="ib" id="b-qs" title="Quick switcher (Ctrl+O)" aria-label="Quick switcher"><svg class="i"><use href="#i-switch"/></svg></button>
+        <button class="ib" id="b-dict" title="Dictionary (Alt+D)" aria-label="Dictionary" aria-pressed="false"><svg class="i"><use href="#i-book"/></svg></button>
         <button class="ib" id="b-ask" hidden title="Ask your notes (Alt+A)" aria-label="Ask your notes" aria-pressed="false"><svg class="i"><use href="#i-ask"/></svg></button>
         <button class="ib" id="b-ap" title="Settings: fonts, text size and backup" aria-label="Settings"><svg class="i"><use href="#i-type"/></svg></button>
       </div>
@@ -410,6 +435,16 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
       </div>
     </div>
 
+    <div class="doc" id="dict-view" hidden>
+      <div class="page">
+        <h1 class="title" style="font-size:clamp(22px,3vw,28px)">Dictionary</h1>
+        <form class="ask-form" id="dict-form"><input id="dict-in" placeholder="Look up or search a word" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Word"><button class="btn primary">Look up</button></form>
+        <p class="ask-hint">Select a word in any note and tap Look up. Words you save get a dotted underline in your notes; tap one to see its meaning.</p>
+        <div class="dict-bar"><span id="dict-count"></span><div class="seg" id="dict-sort"><button data-ds="az">A–Z</button><button data-ds="recent">Recent</button></div></div>
+        <div class="dict-list" id="dict-list"></div>
+      </div>
+    </div>
+
     <div class="graph-wrap" id="graph-view" hidden>
       <canvas id="graph"></canvas>
       <div class="graph-hint">Drag to move · scroll to zoom · click a note to open it</div>
@@ -430,11 +465,19 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 
   <aside class="info" id="info"></aside>
 </div>
+<div class="lk-pop" id="lk-pop" hidden><button id="lk-btn">Look up</button></div>
+<div class="modal" id="wd" hidden>
+  <div class="qs" role="dialog" aria-label="Word">
+    <div class="ap-head"><b id="wd-title">Look up</b><button class="ib" id="wd-close" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="ap-body" id="wd-body"></div>
+  </div>
+</div>
 <nav class="tabbar" id="tabbar" aria-label="Main">
   <button data-nav="files"><svg class="i"><use href="#i-menu"/></svg><span>Notes</span></button>
   <button data-nav="search"><svg class="i"><use href="#i-switch"/></svg><span>Search</span></button>
   <button data-nav="capture" class="tb-cap w"><span class="pill"><svg class="i"><use href="#i-plus"/></svg></span><span>Capture</span></button>
   <button data-nav="ask" id="tb-ask" hidden><svg class="i"><use href="#i-ask"/></svg><span>Ask</span></button>
+  <button data-nav="dict" id="tb-dict"><svg class="i"><use href="#i-book"/></svg><span>Words</span></button>
   <button data-nav="review"><svg class="i"><use href="#i-review"/></svg><span>Review</span><i class="dot" id="tb-due" hidden></i></button>
 </nav>
 <div class="scrim" id="scrim" hidden></div>
@@ -514,7 +557,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
     set(k, v) { try { localStorage.setItem('cp.' + k, JSON.stringify(v)); } catch {} },
   };
   const S = {
-    notes: new Map(), cur: null, mode: 'read', view: 'note', tab: 'files', q: '',
+    notes: new Map(), words: new Map(), cur: null, mode: 'read', view: 'note', tab: 'files', q: '',
     sort: store.get('sort') || 'az', open: new Set(store.get('open') || ['Examples']),
     canWrite: true, ready: false,
   };
@@ -683,6 +726,10 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
     $('note-view').hidden = !(S.view === 'note' && hasNote);
     $('graph-view').hidden = S.view !== 'graph';
     $('ask-view').hidden = S.view !== 'ask';
+    $('dict-view').hidden = S.view !== 'dict';
+    $('b-dict').setAttribute('aria-pressed', S.view === 'dict');
+    $('tb-dict').setAttribute('aria-current', S.view === 'dict');
+    if (S.view === 'dict') { $('crumb').innerHTML = '<b>Dictionary</b>'; paintDict(); }
     $('empty-view').hidden = S.view !== 'note' || hasNote;
     $('b-graph').setAttribute('aria-pressed', S.view === 'graph');
     $('b-ask').setAttribute('aria-pressed', S.view === 'ask');
@@ -796,6 +843,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
         $('read').innerHTML = shown ? renderMd(shown) : `<p class="placeholder">This note is empty.${S.canWrite ? ' Click here to start writing.' : ''}</p>`;
         $('read').querySelectorAll('a[href^="http"]').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
         hydrateImgs($('read'));
+        markWords($('read'));
         $('read').querySelectorAll('input[type="checkbox"]').forEach((cb, i) => { cb.disabled = !S.canWrite; cb.dataset.task = i; });
       }
     }
@@ -1106,7 +1154,9 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
     else if (e.altKey && e.code === 'KeyN') { e.preventDefault(); createNote(); }
     else if (e.altKey && e.code === 'KeyG') { e.preventDefault(); $('b-graph').click(); }
     else if (e.altKey && e.code === 'KeyL') { e.preventDefault(); openCap(); }
+    else if (e.altKey && e.code === 'KeyD') { e.preventDefault(); openDict(); }
     else if (e.altKey && e.code === 'KeyA' && sampleNs) { e.preventDefault(); openAsk(); }
+    else if (e.key === 'Escape' && !$('wd').hidden) { $('wd').hidden = true; }
     else if (e.key === 'Escape' && !$('ap').hidden) { $('ap').hidden = true; }
     else if (e.key === 'Escape' && !$('cap').hidden) { $('cap').hidden = true; }
     else if (e.key === 'Escape' && document.body.matches('.side-open, .info-open')) { document.body.classList.remove('side-open', 'info-open'); syncScrim(); }
@@ -1168,7 +1218,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
   /* ---------- click to edit ---------- */
   $('read').addEventListener('click', (e) => {
     if (!S.canWrite || S.mode !== 'read' || S.proposal || !S.notes.get(S.cur)) return;
-    if (e.target.closest('a, input, button, label, summary')) return;
+    if (e.target.closest('a, input, button, label, summary, .dw')) return;
     const sel = window.getSelection(); if (sel && !sel.isCollapsed) return;
     const body = S.notes.get(S.cur).body || '';
     let pos = body.length;
@@ -1468,6 +1518,7 @@ ${ctx || '(no notes matched)'}`;
     else if (v === 'search') openQS();
     else if (v === 'capture') openCap();
     else if (v === 'ask') openAsk();
+    else if (v === 'dict') openDict();
     else if (v === 'review') { S.tab = 'review'; S.q = ''; $('q').value = ''; renderSide(); document.body.classList.add('side-open'); syncScrim(); }
   });
   const isField = (el) => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'file', 'button'].includes(el.type)));
@@ -1546,8 +1597,8 @@ ${ctx || '(no notes matched)'}`;
   const LocalDB = (() => {
     let dbp = null;
     const open = () => dbp || (dbp = new Promise((res, rej) => {
-      const r = indexedDB.open('engramem', 1);
-      r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('notes', { keyPath: 'id' }); d.createObjectStore('images', { keyPath: 'id' }); };
+      const r = indexedDB.open('engramem', 2);
+      r.onupgradeneeded = () => { const d = r.result; for (const n of ['notes', 'images', 'words']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: 'id' }); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     }));
     const req = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -1561,7 +1612,7 @@ ${ctx || '(no notes matched)'}`;
   })();
   const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   const listeners = new Set();
-  let chan = null; try { chan = new BroadcastChannel('engramem'); chan.onmessage = () => emit(false); } catch {}
+  let chan = null; try { chan = new BroadcastChannel('engramem'); chan.onmessage = () => { emit(false); loadWords(); }; } catch {}
   async function emit(broadcast = true) {
     const rows = await LocalDB.all('notes');
     rows.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1611,7 +1662,8 @@ ${ctx || '(no notes matched)'}`;
     const imgs = await LocalDB.all('images');
     const images = [];
     for (const im of imgs) images.push({ id: im.id, type: im.type, data: await blobToData(im.blob) });
-    const json = JSON.stringify({ app: 'engramem', version: 1, exportedAt: new Date().toISOString(), notes, images });
+    const words = await LocalDB.all('words');
+    const json = JSON.stringify({ app: 'engramem', version: 1, exportedAt: new Date().toISOString(), notes, words, images });
     const d = new Date(), stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const file = new File([json], `engramem-backup-${stamp}.json`, { type: 'application/json' });
     try {
@@ -1639,6 +1691,8 @@ ${ctx || '(no notes matched)'}`;
         const blob = await (await fetch(im.data)).blob();
         await LocalDB.put('images', { id: im.id, blob, type: im.type || blob.type });
       }
+      for (const w of (data.words || [])) { if (!w || !w.id || !w.word) continue; const cur = await LocalDB.get('words', w.id); if (cur && modOf(cur) >= modOf(w)) continue; await LocalDB.put('words', w); }
+      loadWords();
       await emit(); scheduleSync();
       setStatus(added || updated ? `Imported ${added} new and ${updated} updated notes` : 'Nothing new to import');
     } catch { setStatus("That file isn't an Engramem backup.", true); }
@@ -1669,13 +1723,30 @@ ${ctx || '(no notes matched)'}`;
   async function readRemote() {
     const g = await gh('/gists/' + sync.cfg.gist);
     const f = g.files && g.files[SYNC_FILE];
-    if (!f) return { notes: [], deleted: {} };
+    if (!f) return { notes: [], words: [], deleted: {} };
     let text = f.content;
     if (f.truncated) text = await (await fetch(f.raw_url, { cache: 'no-store' })).text();
-    try { const d = JSON.parse(text || '{}'); return { notes: Array.isArray(d.notes) ? d.notes.filter(n => n && n.id) : [], deleted: d.deleted || {} }; }
-    catch { return { notes: [], deleted: {} }; }
+    try { const d = JSON.parse(text || '{}'); return { notes: Array.isArray(d.notes) ? d.notes.filter(n => n && n.id) : [], words: Array.isArray(d.words) ? d.words.filter(n => n && n.id) : [], deleted: d.deleted || {} }; }
+    catch { return { notes: [], words: [], deleted: {} }; }
   }
-  const payload = (notes, deleted) => JSON.stringify({ app: 'engramem', version: 1, syncedAt: new Date().toISOString(), notes, deleted });
+  const payload = (notes, deleted, words = []) => JSON.stringify({ app: 'engramem', version: 1, syncedAt: new Date().toISOString(), notes, words, deleted });
+  async function mergeColl(storeName, remoteArr, deleted, prefix) {
+    const local = await LocalDB.all(storeName);
+    const map = new Map(remoteArr.map(n => [n.id, n]));
+    for (const n of local) { const r = map.get(n.id); if (!r || modOf(n) >= modOf(r)) map.set(n.id, n); }
+    for (const [k, t] of Object.entries(deleted)) {
+      if (prefix ? !k.startsWith(prefix) : k.startsWith('w:')) continue;
+      const id = k.slice(prefix.length), n = map.get(id);
+      if (n && modOf(n) <= t) map.delete(id);
+    }
+    const merged = [...map.values()], localById = new Map(local.map(n => [n.id, n]));
+    let pulled = 0;
+    for (const n of merged) { const l = localById.get(n.id); if (!l || modOf(l) < modOf(n)) { await LocalDB.put(storeName, n); pulled++; } }
+    for (const l of local) if (!map.has(l.id)) { await LocalDB.del(storeName, l.id); pulled++; }
+    const remoteById = new Map(remoteArr.map(n => [n.id, n]));
+    const differs = merged.length !== remoteArr.length || merged.some(n => { const r = remoteById.get(n.id); return !r || modOf(r) !== modOf(n); });
+    return { merged, pulled, differs };
+  }
   async function runSync(manual) {
     if (!sync.cfg || !sync.cfg.gist) return;
     if (sync.busy) { sync.again = true; return; }
@@ -1684,26 +1755,17 @@ ${ctx || '(no notes matched)'}`;
     try {
       await flush();
       const remote = await readRemote();
-      const local = await LocalDB.all('notes');
       const deleted = { ...remote.deleted };
       for (const [id, t] of Object.entries(tombs())) deleted[id] = Math.max(deleted[id] || 0, t);
       const cutoff = Date.now() - 90 * DAY;
       for (const id of Object.keys(deleted)) if (deleted[id] < cutoff) delete deleted[id];
-      // Newest edit of each note wins; a deletion wins over older edits.
-      const map = new Map(remote.notes.map(n => [n.id, n]));
-      for (const n of local) { const r = map.get(n.id); if (!r || modOf(n) >= modOf(r)) map.set(n.id, n); }
-      for (const [id, t] of Object.entries(deleted)) { const n = map.get(id); if (n && modOf(n) <= t) map.delete(id); }
-      const merged = [...map.values()];
-      const localById = new Map(local.map(n => [n.id, n]));
-      let pulled = 0;
-      for (const n of merged) { const l = localById.get(n.id); if (!l || modOf(l) < modOf(n)) { await LocalDB.put('notes', n); pulled++; } }
-      for (const l of local) if (!map.has(l.id)) { await LocalDB.del('notes', l.id); pulled++; }
+      const N = await mergeColl('notes', remote.notes, deleted, '');
+      const W = await mergeColl('words', remote.words, deleted, 'w:');
+      const pulled = N.pulled + W.pulled;
       store.set('tombs', deleted);
-      const remoteById = new Map(remote.notes.map(n => [n.id, n]));
-      const differs = merged.length !== remote.notes.length
-        || merged.some(n => { const r = remoteById.get(n.id); return !r || modOf(r) !== modOf(n); })
-        || Object.keys(deleted).sort().join() !== Object.keys(remote.deleted).sort().join();
-      if (differs) await gh('/gists/' + sync.cfg.gist, { method: 'PATCH', body: JSON.stringify({ files: { [SYNC_FILE]: { content: payload(merged, deleted) } } }) });
+      const differs = N.differs || W.differs || Object.keys(deleted).sort().join() !== Object.keys(remote.deleted).sort().join();
+      if (differs) await gh('/gists/' + sync.cfg.gist, { method: 'PATCH', body: JSON.stringify({ files: { [SYNC_FILE]: { content: payload(N.merged, deleted, W.merged) } } }) });
+      if (W.pulled) loadWords();
       sync.last = Date.now(); store.set('syncLast', sync.last); sync.err = '';
       if (pulled) { await emit(); setStatus(`Synced ${pulled} change${pulled > 1 ? 's' : ''} from your other devices`); }
       else if (manual) setStatus('Everything is in sync');
@@ -1761,6 +1823,188 @@ ${ctx || '(no notes matched)'}`;
   setInterval(() => { if (!document.hidden) runSync(); }, 120000);
   paintSync();
 
+  /* ---------- dictionary ---------- */
+  async function loadWords() {
+    try { S.words = new Map((await LocalDB.all('words')).map(w => [w.id, w])); } catch { S.words = new Map(); }
+    afterWordsChange();
+  }
+  function afterWordsChange() {
+    paintDict();
+    if (S.view === 'note' && S.mode === 'read' && S.notes.get(S.cur)) { lastRead = ''; renderNote(true); }
+  }
+  function saveWord(w) {
+    w.modAt = Date.now(); S.words.set(w.id, w);
+    LocalDB.put('words', w).then(() => { try { chan && chan.postMessage('changed'); } catch {} scheduleSync(); }).catch(() => setStatus("That word didn't save. Try again.", true));
+    afterWordsChange();
+  }
+  function deleteWord(id) {
+    S.words.delete(id); addTomb('w:' + id);
+    LocalDB.del('words', id).then(() => { try { chan && chan.postMessage('changed'); } catch {} scheduleSync(); });
+    afterWordsChange();
+  }
+  function markWords(root) {
+    if (!S.words.size) return;
+    const words = [...S.words.values()].map(w => w.word).filter(w => w && w.length > 1).sort((a, b) => b.length - a.length).slice(0, 600);
+    if (!words.length) return;
+    const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + words.map(escRe).join('|') + ')(?![\\p{L}\\p{N}])', 'giu');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => n.parentElement.closest('a, code, pre, .dw, mark, h1, h2, h3, h4') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const t of nodes) {
+      const txt = t.nodeValue; re.lastIndex = 0;
+      if (!re.test(txt)) continue;
+      re.lastIndex = 0;
+      const frag = document.createDocumentFragment(); let last = 0, m;
+      while ((m = re.exec(txt))) {
+        const start = m.index + m[1].length;
+        frag.append(txt.slice(last, start));
+        const sp = document.createElement('span'); sp.className = 'dw'; sp.dataset.word = key(m[2]); sp.textContent = m[2]; sp.title = 'In your dictionary';
+        frag.append(sp); last = start + m[2].length;
+      }
+      frag.append(txt.slice(last)); t.replaceWith(frag);
+    }
+  }
+  const cleanWord = (t) => String(t || '').replace(/\s+/g, ' ').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').replace(/['’]s$/i, '');
+  const defCache = new Map();
+  async function fetchDef(word) {
+    if (defCache.has(word)) return defCache.get(word);
+    const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word));
+    if (res.status === 404) { defCache.set(word, null); return null; }
+    if (!res.ok) throw new Error('net');
+    const data = await res.json();
+    const e = data[0] || {};
+    const phonetic = e.phonetic || ((data.flatMap(x => x.phonetics || []).find(p => p.text) || {}).text) || '';
+    const meanings = data.flatMap(x => x.meanings || []).slice(0, 4).map(m => ({ pos: m.partOfSpeech || '', defs: (m.definitions || []).slice(0, 3).map(d => ({ d: d.definition || '', ex: d.example || '' })) })).filter(m => m.defs.length);
+    const out = { word: e.word || word, phonetic, meanings };
+    defCache.set(word, out); return out;
+  }
+  async function lookupDef(word) {
+    const w = word.toLowerCase(), c = [w];
+    if (w.endsWith('ies')) c.push(w.slice(0, -3) + 'y');
+    if (w.endsWith('es')) c.push(w.slice(0, -2));
+    if (w.endsWith('s')) c.push(w.slice(0, -1));
+    if (w.endsWith('ed')) c.push(w.slice(0, -2), w.slice(0, -1));
+    if (w.endsWith('ing')) c.push(w.slice(0, -3), w.slice(0, -3) + 'e');
+    if (w.endsWith('ly')) c.push(w.slice(0, -2));
+    for (const x of [...new Set(c)].filter(x => x.length > 1)) { const d = await fetchDef(x); if (d) return d; }
+    return null;
+  }
+  let wdState = null;
+  async function openWord(raw, opts = {}) {
+    const word = cleanWord(raw); if (!word) return;
+    const id = key(word);
+    $('lk-pop').hidden = true;
+    try { window.getSelection().removeAllRanges(); } catch {}
+    const saved = S.words.get(id);
+    wdState = { id, word: saved ? saved.word : word, def: saved ? { phonetic: saved.phonetic || '', meanings: saved.meanings || [] } : null, loading: !saved, err: false, ctx: opts.ctx || '', sourceId: opts.sourceId || '', mine: '', confirmDel: false };
+    $('wd').hidden = false; paintWord();
+    if (saved) return;
+    let d = null, err = false;
+    try { d = await lookupDef(word); } catch { err = true; }
+    if (!wdState || wdState.id !== id) return;
+    wdState.def = d; wdState.err = err; wdState.loading = false;
+    if (d && key(d.word) !== id && !S.words.get(id)) wdState.word = word;
+    paintWord();
+  }
+  function paintWord() {
+    const s = wdState; if (!s) return;
+    const saved = S.words.get(s.id);
+    const srcId = s.sourceId || (saved && saved.sourceId) || '';
+    const src = srcId ? S.notes.get(srcId) : null;
+    const ctx = s.ctx || (saved && saved.context) || '';
+    const mine = saved ? (saved.mine || '') : s.mine;
+    const hasDefs = s.def && s.def.meanings && s.def.meanings.length;
+    let defs;
+    if (s.loading) defs = '<p class="bk-note">Looking it up…</p>';
+    else if (hasDefs) defs = s.def.meanings.map(m => `<div class="wd-pos">${esc(m.pos)}</div><ol class="wd-defs">${m.defs.map(d => `<li>${esc(d.d)}${d.ex ? `<em>“${esc(d.ex)}”</em>` : ''}</li>`).join('')}</ol>`).join('');
+    else if (s.err) defs = "<p class=\"bk-note\">Couldn't load a definition. Check your connection. You can still save the word with your own meaning.</p>";
+    else defs = `<p class="bk-note">No dictionary entry for “${esc(s.word)}”. You can save it with your own meaning.</p>`;
+    const srcBtn = src ? `<button data-open="${esc(src.id)}">From ${esc(src.title)}</button>` : '';
+    $('wd-title').textContent = saved ? 'In your dictionary' : 'Look up';
+    $('wd-body').innerHTML = `
+      <div><p class="wd-word">${esc(s.word)}</p>${s.def && s.def.phonetic ? `<span class="wd-ph">${esc(s.def.phonetic)}</span>` : ''}</div>
+      <div>${defs}</div>
+      ${ctx || srcBtn ? `<div class="wd-ctx">${esc(ctx)}${ctx && srcBtn ? '<br>' : ''}${srcBtn}</div>` : ''}
+      <label class="bk-note" for="wd-mine">${hasDefs || s.loading ? 'My note (optional)' : 'Meaning in my own words'}</label>
+      <textarea id="wd-mine" placeholder="An example, or how you'll remember it">${esc(mine)}</textarea>
+      <div class="wd-acts">
+        ${saved
+          ? (s.confirmDel
+            ? '<span class="confirm">Remove this word? <button class="del" data-wd="del-yes">Remove</button><button data-wd="del-no">Cancel</button></span>'
+            : '<button class="btn primary" data-wd="close">Done</button><button class="btn" data-wd="del">Remove</button>')
+          : `<button class="btn primary" data-wd="save"${s.loading ? ' disabled' : ''}>Save to dictionary</button><button class="btn" data-wd="close">Close</button>`}
+        <a href="https://en.wiktionary.org/wiki/${encodeURIComponent(s.word.toLowerCase())}" target="_blank" rel="noopener">More on Wiktionary</a>
+      </div>`;
+  }
+  $('wd-body').addEventListener('input', (e) => { if (e.target.id === 'wd-mine' && wdState) wdState.mine = e.target.value; });
+  $('wd-body').addEventListener('change', (e) => { if (e.target.id === 'wd-mine' && wdState) { const w = S.words.get(wdState.id); if (w) saveWord({ ...w, mine: e.target.value.trim() }); } });
+  $('wd-body').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-wd]'); if (!b || !wdState) return;
+    const s = wdState, a = b.dataset.wd;
+    if (a === 'close') { $('wd').hidden = true; }
+    else if (a === 'save') {
+      const src = s.sourceId ? S.notes.get(s.sourceId) : null;
+      saveWord({ id: s.id, word: s.word, phonetic: (s.def && s.def.phonetic) || '', meanings: (s.def && s.def.meanings) || [], mine: ($('wd-mine').value || '').trim(), context: s.ctx, sourceId: s.sourceId, sourceTitle: src ? src.title : '', createdAt: Date.now() });
+      setStatus(`Saved “${s.word}” to your dictionary`); paintWord();
+    }
+    else if (a === 'del') { s.confirmDel = true; paintWord(); }
+    else if (a === 'del-no') { s.confirmDel = false; paintWord(); }
+    else if (a === 'del-yes') { deleteWord(s.id); $('wd').hidden = true; setStatus(`Removed “${s.word}”`); }
+  });
+  $('wd').addEventListener('click', (e) => { if (e.target.closest('[data-open]')) $('wd').hidden = true; });
+  $('wd-close').onclick = () => { $('wd').hidden = true; };
+  $('wd').addEventListener('pointerdown', (e) => { if (e.target === $('wd')) $('wd').hidden = true; });
+  $('read').addEventListener('click', (e) => { const d = e.target.closest('.dw'); if (d) { const w = S.words.get(d.dataset.word); openWord(w ? w.word : d.textContent); } });
+
+  // Select a word in a note -> Look up button
+  let selWord = '', selCtx = '', selT = null;
+  function checkSel() {
+    const pop = $('lk-pop'), sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount || !$('wd').hidden) { pop.hidden = true; return; }
+    const r = sel.getRangeAt(0);
+    const host = r.commonAncestorContainer.nodeType === 1 ? r.commonAncestorContainer : r.commonAncestorContainer.parentElement;
+    if (!host || !host.closest('#read, #ask-log')) { pop.hidden = true; return; }
+    const text = cleanWord(sel.toString());
+    if (!text || text.length > 40 || text.split(' ').length > 3 || !/\p{L}/u.test(text)) { pop.hidden = true; return; }
+    selWord = text;
+    const block = host.closest('p, li, td, blockquote, h1, h2, h3, h4');
+    selCtx = block ? block.textContent.replace(/\s+/g, ' ').trim().slice(0, 240) : '';
+    $('lk-btn').textContent = `Look up “${text}”`;
+    pop.hidden = false;
+    const rect = r.getBoundingClientRect();
+    const top = Math.min(window.innerHeight - 70, rect.bottom + 12);
+    const left = Math.max(12, Math.min(window.innerWidth - pop.offsetWidth - 12, rect.left + rect.width / 2 - pop.offsetWidth / 2));
+    pop.style.top = top + 'px'; pop.style.left = left + 'px';
+  }
+  document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(checkSel, 220); });
+  $('lk-btn').addEventListener('pointerdown', (e) => e.preventDefault());
+  $('lk-btn').addEventListener('click', () => openWord(selWord, { ctx: selCtx, sourceId: S.view === 'note' ? S.cur : '' }));
+  $('note-view').addEventListener('scroll', () => { $('lk-pop').hidden = true; }, { passive: true });
+
+  // Dictionary view
+  let dictSort = store.get('dictSort') || 'az';
+  function openDict() { flush(); S.view = 'dict'; document.body.classList.remove('side-open', 'info-open'); syncScrim(); renderAll(); }
+  function paintDict() {
+    if (S.view !== 'dict') return;
+    const raw = $('dict-in').value.trim(), q = key(raw);
+    let list = [...S.words.values()];
+    if (q) list = list.filter(w => key(w.word).includes(q) || (w.mine || '').toLowerCase().includes(q) || (w.meanings || []).some(m => m.defs.some(d => (d.d || '').toLowerCase().includes(q))));
+    list.sort(dictSort === 'az' ? (a, b) => a.word.localeCompare(b.word) : (a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    $('dict-count').textContent = S.words.size === 1 ? '1 word' : `${S.words.size} words`;
+    $('dict-sort').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.ds === dictSort));
+    $('dict-list').innerHTML = list.length ? list.map(w => {
+      const m = (w.meanings || [])[0], d = m && m.defs[0] ? m.defs[0].d : (w.mine || 'Your own word');
+      const src = w.sourceId && S.notes.get(w.sourceId);
+      return `<button class="wcard" data-word="${esc(w.id)}"><span><b>${esc(w.word)}</b>${m && m.pos ? `<span class="pos">${esc(m.pos)}</span>` : ''}</span><small>${src ? esc(src.title) + ' · ' : ''}${esc(fmt(w.createdAt))}</small><span class="def">${esc(d)}</span></button>`;
+    }).join('')
+      : (S.words.size ? `<p class="bk-note" style="padding:14px 0">No saved words match. Tap Look up to find “${esc(raw)}”.</p>`
+        : '<p class="bk-note" style="padding:14px 0">No words yet. Select a word in any note and tap <b>Look up</b>, or type one above.</p>');
+  }
+  $('dict-form').addEventListener('submit', (e) => { e.preventDefault(); openWord($('dict-in').value); });
+  $('dict-in').addEventListener('input', paintDict);
+  $('dict-list').addEventListener('click', (e) => { const b = e.target.closest('[data-word]'); if (b) { const w = S.words.get(b.dataset.word); if (w) openWord(w.word); } });
+  $('dict-sort').addEventListener('click', (e) => { const b = e.target.closest('[data-ds]'); if (b) { dictSort = b.dataset.ds; store.set('dictSort', dictSort); paintDict(); } });
+  $('b-dict').onclick = () => { if (S.view === 'dict') { S.view = 'note'; renderAll(true); } else openDict(); };
+
   /* ---------- first run ---------- */
   async function seedIfEmpty() {
     if (store.get('seeded')) return;
@@ -1784,6 +2028,7 @@ ${ctx || '(no notes matched)'}`;
     sampleNs = null; assetsNs = localAssets;
     try { await seedIfEmpty(); } catch {}
     col = localCol;
+    loadWords();
     setTimeout(() => runSync(), 800);
     if (!S.canWrite) document.querySelectorAll('.w').forEach(b => b.hidden = true);
     $('b-tidy').hidden = !sampleNs || !S.canWrite;
