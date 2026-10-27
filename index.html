@@ -203,6 +203,12 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
 .bk-note { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.6; max-width: 52ch; }
 .bk-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .bk-last { font-size: 11px; color: var(--faint); }
+.bk-last.err { color: var(--danger); }
+.sync-steps { margin: 0; padding-left: 18px; font-size: 12px; color: var(--muted); line-height: 1.7; max-width: 52ch; }
+.sync-steps a { color: var(--accent); }
+#sync-token { flex: 1 1 180px; min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--side); padding: 7px 10px; font-size: 13px; font-family: var(--mono); }
+#sync-token:focus { outline: none; border-color: var(--accent); }
+@media (max-width: 820px) { #sync-token { font-size: 16px; } }
 
 /* Capture and tidy */
 .cap-btn { display: flex; align-items: center; gap: 6px; padding: 5px 11px 5px 8px; border-radius: 6px; background: var(--accent); color: var(--bg); font-weight: 600; font-size: 13px; white-space: nowrap; }
@@ -455,6 +461,21 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
       <p class="bk-note">Your notes are saved on this device only. Export a backup now and then, and import it on a new phone or computer.</p>
       <div class="bk-row"><button class="btn primary" id="bk-export">Export backup</button><button class="btn" id="bk-import">Import backup</button><input type="file" id="bk-file" accept="application/json,.json" hidden></div>
       <span class="bk-last" id="bk-last"></span>
+      <h3>Sync</h3>
+      <div id="sync-off" style="display:flex;flex-direction:column;gap:8px">
+        <p class="bk-note">Keep your notes the same on your phone and computer. Engramem saves them to a private gist on your GitHub account that only you can see.</p>
+        <ol class="sync-steps">
+          <li>Open <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Engramem" target="_blank" rel="noopener">github.com/settings/tokens/new</a>. The gist box is already ticked.</li>
+          <li>Set Expiration to No expiration, tap Generate token, and copy it.</li>
+          <li>Paste it here and tap Connect. Do the same on your other devices.</li>
+        </ol>
+        <div class="bk-row"><input id="sync-token" type="password" placeholder="Paste your GitHub token" autocomplete="off" spellcheck="false" aria-label="GitHub token"><button class="btn primary" id="sync-connect">Connect</button></div>
+      </div>
+      <div id="sync-on" hidden style="display:flex;flex-direction:column;gap:8px">
+        <p class="bk-note" id="sync-who"></p>
+        <div class="bk-row"><button class="btn primary" id="sync-now">Sync now</button><button class="btn" id="sync-disconnect">Disconnect</button></div>
+      </div>
+      <span class="bk-last" id="sync-msg"></span>
     </div>
   </div>
 </div>
@@ -1086,6 +1107,8 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); 
     else if (e.altKey && e.code === 'KeyG') { e.preventDefault(); $('b-graph').click(); }
     else if (e.altKey && e.code === 'KeyL') { e.preventDefault(); openCap(); }
     else if (e.altKey && e.code === 'KeyA' && sampleNs) { e.preventDefault(); openAsk(); }
+    else if (e.key === 'Escape' && !$('ap').hidden) { $('ap').hidden = true; }
+    else if (e.key === 'Escape' && !$('cap').hidden) { $('cap').hidden = true; }
     else if (e.key === 'Escape' && document.body.matches('.side-open, .info-open')) { document.body.classList.remove('side-open', 'info-open'); syncScrim(); }
   });
   window.addEventListener('resize', () => { if (S.mode === 'edit') autosize(); });
@@ -1547,15 +1570,15 @@ ${ctx || '(no notes matched)'}`;
     if (broadcast && chan) chan.postMessage('changed');
   }
   let persisted = false;
-  async function afterWrite() { if (!persisted) { persisted = true; try { await navigator.storage?.persist?.(); } catch {} } emit(); }
+  async function afterWrite() { if (!persisted) { persisted = true; try { await navigator.storage?.persist?.(); } catch {} } emit(); scheduleSync(); }
   const localCol = {
     doc(id) {
       id = id || newId();
       return {
         id,
-        set: async (data) => { await LocalDB.put('notes', { ...data, id }); afterWrite(); },
-        update: async (data) => { const cur = await LocalDB.get('notes', id); if (!cur) throw { code: 'invalid_argument' }; await LocalDB.put('notes', { ...cur, ...data, id }); afterWrite(); },
-        delete: async () => { await LocalDB.del('notes', id); afterWrite(); },
+        set: async (data) => { await LocalDB.put('notes', { ...data, id, modAt: Date.now() }); afterWrite(); },
+        update: async (data) => { const cur = await LocalDB.get('notes', id); if (!cur) throw { code: 'invalid_argument' }; await LocalDB.put('notes', { ...cur, ...data, id, modAt: Date.now() }); afterWrite(); },
+        delete: async () => { await LocalDB.del('notes', id); addTomb(id); afterWrite(); },
       };
     },
     onSnapshot(next) { listeners.add(next); emit(false); return () => listeners.delete(next); },
@@ -1616,7 +1639,7 @@ ${ctx || '(no notes matched)'}`;
         const blob = await (await fetch(im.data)).blob();
         await LocalDB.put('images', { id: im.id, blob, type: im.type || blob.type });
       }
-      await emit();
+      await emit(); scheduleSync();
       setStatus(added || updated ? `Imported ${added} new and ${updated} updated notes` : 'Nothing new to import');
     } catch { setStatus("That file isn't an Engramem backup.", true); }
   }
@@ -1628,6 +1651,115 @@ ${ctx || '(no notes matched)'}`;
   $('bk-import').onclick = () => $('bk-file').click();
   $('bk-file').onchange = (e) => { const f = e.target.files[0]; if (f) importBackup(f); e.target.value = ''; };
   paintBackup();
+
+  /* ---------- GitHub sync ---------- */
+  const SYNC_FILE = 'engramem-notes.json';
+  const sync = { cfg: store.get('sync') || null, busy: false, again: false, timer: null, last: store.get('syncLast') || 0, err: '' };
+  const tombs = () => store.get('tombs') || {};
+  function addTomb(id) { const t = tombs(); t[id] = Date.now(); store.set('tombs', t); }
+  const modOf = (n) => n.modAt || n.updatedAt || n.createdAt || 0;
+  function scheduleSync() { if (!sync.cfg || !sync.cfg.gist) return; clearTimeout(sync.timer); sync.timer = setTimeout(() => runSync(), 3000); }
+  async function gh(path, opts = {}) {
+    const res = await fetch('https://api.github.com' + path, { ...opts, cache: 'no-store', headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + sync.cfg.token, ...(opts.body ? { 'Content-Type': 'application/json' } : {}) } });
+    if (res.status === 401 || res.status === 403) throw { code: 'auth' };
+    if (res.status === 404) throw { code: 'missing' };
+    if (!res.ok) throw { code: 'net' };
+    return res.json();
+  }
+  async function readRemote() {
+    const g = await gh('/gists/' + sync.cfg.gist);
+    const f = g.files && g.files[SYNC_FILE];
+    if (!f) return { notes: [], deleted: {} };
+    let text = f.content;
+    if (f.truncated) text = await (await fetch(f.raw_url, { cache: 'no-store' })).text();
+    try { const d = JSON.parse(text || '{}'); return { notes: Array.isArray(d.notes) ? d.notes.filter(n => n && n.id) : [], deleted: d.deleted || {} }; }
+    catch { return { notes: [], deleted: {} }; }
+  }
+  const payload = (notes, deleted) => JSON.stringify({ app: 'engramem', version: 1, syncedAt: new Date().toISOString(), notes, deleted });
+  async function runSync(manual) {
+    if (!sync.cfg || !sync.cfg.gist) return;
+    if (sync.busy) { sync.again = true; return; }
+    if (!navigator.onLine) { sync.err = 'offline'; paintSync(); return; }
+    sync.busy = true; paintSync();
+    try {
+      await flush();
+      const remote = await readRemote();
+      const local = await LocalDB.all('notes');
+      const deleted = { ...remote.deleted };
+      for (const [id, t] of Object.entries(tombs())) deleted[id] = Math.max(deleted[id] || 0, t);
+      const cutoff = Date.now() - 90 * DAY;
+      for (const id of Object.keys(deleted)) if (deleted[id] < cutoff) delete deleted[id];
+      // Newest edit of each note wins; a deletion wins over older edits.
+      const map = new Map(remote.notes.map(n => [n.id, n]));
+      for (const n of local) { const r = map.get(n.id); if (!r || modOf(n) >= modOf(r)) map.set(n.id, n); }
+      for (const [id, t] of Object.entries(deleted)) { const n = map.get(id); if (n && modOf(n) <= t) map.delete(id); }
+      const merged = [...map.values()];
+      const localById = new Map(local.map(n => [n.id, n]));
+      let pulled = 0;
+      for (const n of merged) { const l = localById.get(n.id); if (!l || modOf(l) < modOf(n)) { await LocalDB.put('notes', n); pulled++; } }
+      for (const l of local) if (!map.has(l.id)) { await LocalDB.del('notes', l.id); pulled++; }
+      store.set('tombs', deleted);
+      const remoteById = new Map(remote.notes.map(n => [n.id, n]));
+      const differs = merged.length !== remote.notes.length
+        || merged.some(n => { const r = remoteById.get(n.id); return !r || modOf(r) !== modOf(n); })
+        || Object.keys(deleted).sort().join() !== Object.keys(remote.deleted).sort().join();
+      if (differs) await gh('/gists/' + sync.cfg.gist, { method: 'PATCH', body: JSON.stringify({ files: { [SYNC_FILE]: { content: payload(merged, deleted) } } }) });
+      sync.last = Date.now(); store.set('syncLast', sync.last); sync.err = '';
+      if (pulled) { await emit(); setStatus(`Synced ${pulled} change${pulled > 1 ? 's' : ''} from your other devices`); }
+      else if (manual) setStatus('Everything is in sync');
+    } catch (e) {
+      sync.err = e && (e.code === 'auth' || e.code === 'missing') ? e.code : 'net';
+      if (manual || sync.err !== 'net') setStatus(syncErrText(), true);
+    } finally {
+      sync.busy = false; paintSync();
+      if (sync.again) { sync.again = false; setTimeout(() => runSync(), 500); }
+    }
+  }
+  function syncErrText() {
+    return sync.err === 'auth' ? 'GitHub stopped accepting your token. Disconnect, then connect with a new token.'
+      : sync.err === 'missing' ? 'Your sync gist is gone. Disconnect, then connect again to make a new one.'
+      : sync.err === 'offline' ? 'Offline. Engramem will sync when you are back online.'
+      : "Couldn't reach GitHub. Engramem will try again soon.";
+  }
+  function syncMsg(t, err) { $('sync-msg').textContent = t; $('sync-msg').classList.toggle('err', !!err); }
+  const agoTime = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : fmt(t); };
+  function paintSync() {
+    const on = !!(sync.cfg && sync.cfg.gist);
+    $('sync-off').hidden = on; $('sync-on').hidden = !on;
+    if (!on) return;
+    $('sync-who').textContent = `Syncing through GitHub${sync.cfg.login ? ' as @' + sync.cfg.login : ''}. Your notes are kept in a private gist. Images stay on each device.`;
+    syncMsg(sync.busy ? 'Syncing…' : sync.err ? syncErrText() : sync.last ? `Last synced ${agoTime(sync.last)}` : 'Not synced yet.', !!sync.err && !sync.busy);
+  }
+  async function connectSync(raw) {
+    const token = String(raw || '').trim();
+    if (!token) return syncMsg('Paste your token first.', true);
+    sync.cfg = { token, gist: null }; syncMsg('Connecting…');
+    $('sync-connect').disabled = true;
+    try {
+      const me = await gh('/user');
+      let gist = null;
+      for (let page = 1; page <= 5 && !gist; page++) {
+        const list = await gh(`/gists?per_page=100&page=${page}`);
+        gist = list.find(g => g.files && g.files[SYNC_FILE]) || null;
+        if (list.length < 100) break;
+      }
+      if (!gist) gist = await gh('/gists', { method: 'POST', body: JSON.stringify({ description: 'Engramem notes (kept in sync by the Engramem app)', public: false, files: { [SYNC_FILE]: { content: payload([], {}) } } }) });
+      sync.cfg = { token, gist: gist.id, login: me.login };
+      store.set('sync', sync.cfg); $('sync-token').value = ''; sync.err = '';
+      paintSync(); await runSync(true);
+    } catch (e) {
+      sync.cfg = null;
+      syncMsg(e && e.code === 'auth' ? "GitHub didn't accept that token. Make sure the gist box was ticked when you made it." : "Couldn't reach GitHub. Check your connection and try again.", true);
+    } finally { $('sync-connect').disabled = false; }
+  }
+  $('sync-connect').onclick = () => connectSync($('sync-token').value);
+  $('sync-token').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); connectSync($('sync-token').value); } });
+  $('sync-now').onclick = () => runSync(true);
+  $('sync-disconnect').onclick = () => { sync.cfg = null; store.set('sync', null); sync.err = ''; paintSync(); syncMsg('Disconnected. Your notes stay on this device.'); };
+  document.addEventListener('visibilitychange', () => { if (!sync.cfg) return; if (document.hidden) { clearTimeout(sync.timer); runSync(); } else runSync(); });
+  window.addEventListener('online', () => runSync());
+  setInterval(() => { if (!document.hidden) runSync(); }, 120000);
+  paintSync();
 
   /* ---------- first run ---------- */
   async function seedIfEmpty() {
@@ -1652,6 +1784,7 @@ ${ctx || '(no notes matched)'}`;
     sampleNs = null; assetsNs = localAssets;
     try { await seedIfEmpty(); } catch {}
     col = localCol;
+    setTimeout(() => runSync(), 800);
     if (!S.canWrite) document.querySelectorAll('.w').forEach(b => b.hidden = true);
     $('b-tidy').hidden = !sampleNs || !S.canWrite;
     $('b-ask').hidden = !sampleNs;

@@ -1,5 +1,5 @@
 // Engramem offline support: keep the app and its libraries so it opens without a connection.
-const VERSION = 'engramem-v1';
+const VERSION = 'engramem-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png', './vendor/marked.min.js', './vendor/purify.min.js'];
 
 self.addEventListener('install', (e) => {

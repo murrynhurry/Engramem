@@ -2,7 +2,7 @@
 
 A place to keep what you learn: quick capture, Markdown notes, `[[links]]`, backlinks, a graph view and spaced review.
 
-Notes are stored on your device (in the browser's storage). Open **Settings** (the Aa button) and use **Export backup** now and then to keep a copy, and **Import backup** to move notes to another device.
+Notes are stored on your device (in the browser's storage). To keep them the same across devices, open **Settings** (the Aa button) and connect **Sync** with a GitHub token that has the `gist` permission; notes are kept in a private gist on your account. **Export backup** and **Import backup** are there too.
 
 ## Install on iPhone
 
